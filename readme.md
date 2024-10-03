@@ -31,7 +31,7 @@ To get started with the repository, follow these steps:
 
 Here's a brief overview of the repository structure:
 
-
+```
 DevOps 📁 .
 ├── 📁 CI-CDPipeline
 ├── 📁 Cloud
@@ -43,7 +43,7 @@ DevOps 📁 .
 ├── 📁 readme.md
 ├── 📁 Security
 └── 📁 Shell-Scipt
-
+```
 
 ## 🛠️ What to Contribute
 
