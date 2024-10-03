@@ -1,4 +1,4 @@
-```markdown
+
 # DevOps Open Source Repository
 
 Welcome to the **DevOps Open Source Repository**! This is a collaborative space for developers, engineers, and enthusiasts to contribute, learn, and share their DevOps projects and tools. Whether you're just starting out or are a seasoned professional, there's a place for you here.
