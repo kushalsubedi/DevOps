@@ -11,7 +11,7 @@ env:
   GITHUB_USERNAME: ${{ github.actor }}
   GITHUB_PASSWORD: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
   REGISTRY: ghcr.io
-  IMAGE_NAME: kushalsubedi/flask-app
+  IMAGE_NAME: flask-app
 
 jobs:
   build_docker_image:
@@ -33,4 +33,4 @@ jobs:
         with:
           context: ./Projects
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{env.GITHUB_USERNAME}}/${{ env.IMAGE_NAME }}:latest
