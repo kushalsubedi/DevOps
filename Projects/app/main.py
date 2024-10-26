@@ -44,7 +44,7 @@ init_db()
 
 @app.route("/", methods=["GET"])
 def greet_user():
-    return jsonify({"message": "Hello guys how are you doing !! "})
+    return jsonify({"message": "Hello guys whats up!! "})
 
 
 @app.route("/books", methods=["POST"])
