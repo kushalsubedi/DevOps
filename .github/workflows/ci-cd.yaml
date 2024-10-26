@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "Projects"
+
 
 env:
   GITHUB_USERNAME: ${{ github.actor }}
