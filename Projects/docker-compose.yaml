@@ -1,0 +1,5 @@
+services:
+  web:
+    image: ghcr.io/kushalsubedi/flask-app:latest
+    ports:
+      - "8000:5000"   
