@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DocuMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --background-color: #f8f9fa;
+      --card-background: #ffffff;
+      --text-color: #343a40;
+      --subtle-text: #6c757d;
+      --border-color: #dee2e6;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    #uploadForm {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: var(--card-background);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    /* Custom File Input */
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        cursor: pointer;
+        padding: 10px 20px;
+        background-color: var(--subtle-text);
+        color: white;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+    .file-input-wrapper:hover {
+        background-color: #5a6268;
+    }
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    #fileName {
+        margin-left: 15px;
+        font-style: italic;
+        color: var(--subtle-text);
+    }
+
+    button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    button:active {
+        transform: scale(0.98);
+    }
+    button:disabled {
+        background-color: #a5b4fc;
+        cursor: not-allowed;
+    }
+
+    #fileList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .file-card {
+      background: var(--card-background);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .file-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    .file-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+    }
+    .file-name {
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    pre {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    /* Context Menu */
+    .context-menu {
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        background: var(--card-background);
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        padding: 8px 0;
+        min-width: 180px;
+    }
+    .context-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .context-menu ul li {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .context-menu ul li:hover {
+        background-color: var(--background-color);
+    }
+    .context-menu ul .separator {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📂 DocuMind</h1>
+
+    <div id="uploadForm">
+      <label class="file-input-wrapper">
+          Choose File
+          <input type="file" id="fileInput">
+      </label>
+      <span id="fileName">No file selected</span>
+      <button onclick="uploadFile()" style="margin-left: 15px;">Upload</button>
+    </div>
+
+    <h2>Files</h2>
+    <div id="fileList"></div>
+
+    <h2>Stats</h2>
+    <pre id="statsBox">Loading...</pre>
+  </div>
+
+  <div id="contextMenu" class="context-menu">
+      <ul>
+          <li onclick="handleContextMenu('download')">📥 Download</li>
+          <li onclick="handleContextMenu('summarize')">📝 Summarize</li>
+          <li onclick="handleContextMenu('suggestTitle')">💡 Suggest Title</li>
+          <li class="separator"></li>
+          <li onclick="handleContextMenu('rename')">✏️ Rename</li>
+          <li onclick="handleContextMenu('delete')" style="color: #dc3545;">🗑️ Delete</li>
+      </ul>
+  </div>
+
+
+<script>
+const API_BASE = "https://4zxvlyu9ug.execute-api.us-east-1.amazonaws.com"; // replace with your API Gateway invoke URL
+let contextFileKey = null; // Variable to store the key of the right-clicked file
+
+// --- CONTEXT MENU LOGIC ---
+const contextMenu = document.getElementById('contextMenu');
+
+function showContextMenu(event) {
+    event.preventDefault();
+    const card = event.target.closest('.file-card');
+    if (!card) return;
+
+    contextFileKey = card.dataset.key;
+    contextMenu.style.display = 'block';
+    
+    const { clientX: mouseX, clientY: mouseY } = event;
+    const { normalizedX, normalizedY } = normalizePosition(mouseX, mouseY);
+    contextMenu.style.left = `${normalizedX}px`;
+    contextMenu.style.top = `${normalizedY}px`;
+}
+
+function hideContextMenu() {
+    contextMenu.style.display = 'none';
+    contextFileKey = null;
+}
+
+function normalizePosition(mouseX, mouseY) {
+    const { innerWidth: scopeVpW, innerHeight: scopeVpH } = window;
+    const { offsetWidth: contextW, offsetHeight: contextH } = contextMenu;
+    const outOfBoundsOnX = mouseX + contextW > scopeVpW;
+    const outOfBoundsOnY = mouseY + contextH > scopeVpH;
+
+    let normalizedX = mouseX;
+    let normalizedY = mouseY;
+    if (outOfBoundsOnX) {
+        normalizedX = scopeVpW - contextW;
+    }
+    if (outOfBoundsOnY) {
+        normalizedY = scopeVpH - contextH;
+    }
+    return { normalizedX, normalizedY };
+}
+
+function handleContextMenu(action) {
+    if (!contextFileKey) return;
+    switch (action) {
+        case 'download':
+            downloadFile(contextFileKey);
+            break;
+        case 'summarize':
+            summarize(contextFileKey);
+            break;
+        case 'suggestTitle':
+            suggestTitle(contextFileKey);
+            break;
+        case 'rename':
+            renameFilePrompt(contextFileKey);
+            break;
+        case 'delete':
+            deleteFile(contextFileKey);
+            break;
+    }
+    hideContextMenu();
+}
+
+// Add event listeners
+document.getElementById('fileList').addEventListener('contextmenu', showContextMenu);
+window.addEventListener('click', hideContextMenu);
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const fileNameSpan = document.getElementById('fileName');
+    fileNameSpan.textContent = e.target.files.length > 0 ? e.target.files[0].name : "No file selected";
+});
+
+// --- CORE APPLICATION LOGIC ---
+
+async function listFiles() {
+  try {
+    const res = await fetch(`${API_BASE}/list-files`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    
+    const fileListDiv = document.getElementById('fileList');
+    fileListDiv.innerHTML = '';
+    
+    if (!data.files || data.files.length === 0) {
+      fileListDiv.innerHTML = '<p>No files found. Upload a file to get started!</p>';
+      return;
+    }
+    
+    data.files.forEach(file => {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.dataset.key = file.key; // Store key for context menu
+      card.innerHTML = `
+        <div class="file-icon">📄</div>
+        <div class="file-name">${file.key}</div>
+      `;
+      fileListDiv.appendChild(card);
+    });
+  } catch (error) {
+    console.error('Error listing files:', error);
+    document.getElementById('fileList').innerHTML = `<p style="color: red;">Error loading files: ${error.message}</p>`;
+  }
+}
+
+async function uploadFile() {
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) {
+    alert("Please select a file.");
+    return;
+  }
+  const file = fileInput.files[0];
+  const uploadButton = document.querySelector('#uploadForm button');
+  const originalText = uploadButton.textContent;
+  
+  try {
+    uploadButton.textContent = 'Uploading...';
+    uploadButton.disabled = true;
+
+    const res = await fetch(`${API_BASE}/generate-upload-url?filename=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type || 'application/octet-stream')}`);
+    if (!res.ok) throw new Error(`Failed to get upload URL: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const uploadRes = await fetch(data.upload_url, { 
+      method: 'PUT', 
+      body: file,
+      headers: { 'Content-Type': file.type || 'application/octet-stream' }
+    });
+    if (!uploadRes.ok) throw new Error(`Upload failed: ${uploadRes.status} - ${uploadRes.statusText}`);
+
+    alert("Upload successful!");
+    fileInput.value = ''; // Reset file input
+    document.getElementById('fileName').textContent = 'No file selected';
+    listFiles();
+  } catch (error) {
+    console.error('Upload error:', error);
+    alert(`Upload failed: ${error.message}`);
+  } finally {
+    uploadButton.textContent = 'Upload';
+    uploadButton.disabled = false;
+  }
+}
+
+async function downloadFile(key) {
+  try {
+    const res = await fetch(`${API_BASE}/get-download-url?key=${encodeURIComponent(key)}`);
+    if (!res.ok) throw new Error(`Failed to get download URL: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    window.open(data.download_url, '_blank');
+  } catch (error) {
+    console.error('Download error:', error);
+    alert(`Download failed: ${error.message}`);
+  }
+}
+
+async function deleteFile(key) {
+  if (!confirm(`Are you sure you want to delete "${key}"?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/delete-file`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    alert('File deleted successfully!');
+    listFiles();
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert(`Delete failed: ${error.message}`);
+  }
+}
+
+async function renameFilePrompt(oldKey) {
+  const newKey = prompt("Enter new file name:", oldKey);
+  if (!newKey || newKey === oldKey) return;
+  try {
+    const res = await fetch(`${API_BASE}/rename-file`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ old_key: oldKey, new_key: newKey })
+    });
+    if (!res.ok) throw new Error(`Rename failed: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    alert('File renamed successfully!');
+    listFiles();
+  } catch (error) {
+    console.error('Rename error:', error);
+    alert(`Rename failed: ${error.message}`);
+  }
+}
+
+async function suggestTitle(key) {
+  try {
+    const res = await fetch(`${API_BASE}/suggest-title`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    if (!res.ok) throw new Error(`Title suggestion failed: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    alert(`Suggested Title: ${data.suggested_title}`);
+  } catch (error) {
+    console.error('Title suggestion error:', error);
+    alert(`Title suggestion failed: ${error.message}`);
+  }
+}
+
+async function summarize(key) {
+  alert('Summarizing... this may take a moment.');
+  try {
+    const res = await fetch(`${API_BASE}/summarize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    if (!res.ok) throw new Error(`Summarization failed: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    // Display summary in a more readable way
+    const summaryWindow = window.open('', '_blank');
+    summaryWindow.document.write(`<pre style="font-family: Arial, sans-serif; white-space: pre-wrap; word-wrap: break-word;">${data.summary}</pre>`);
+  } catch (error) {
+    console.error('Summarization error:', error);
+    alert(`Summarization failed: ${error.message}`);
+  }
+}
+
+async function getStats() {
+  try {
+    const res = await fetch(`${API_BASE}/stats`);
+    if (!res.ok) throw new Error(`Stats failed: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('statsBox').textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    console.error('Stats error:', error);
+    document.getElementById('statsBox').textContent = `Error loading stats: ${error.message}`;
+  }
+}
+
+// Initial load
+listFiles();
+getStats();
+</script>
+</body>
+</html>
